@@ -10,6 +10,8 @@ import json
 
 torch.manual_seed(1)  # set the random seed
 
+TRAINING_RESULTS = True
+
 
 class EmotionNet(nn.Module):
     def __init__(self):
@@ -49,8 +51,8 @@ if __name__ == "__main__":
     transform = transforms.Compose([transforms.Resize((90, 160)),  # (1080,1920) (hight, width)
                                     transforms.CenterCrop(80),
                                     transforms.ToTensor()])
-    valFolder = datasets.ImageFolder('./data/val', transform=transform)
-    val_loader = torch.utils.data.DataLoader(valFolder, batch_size=1)
+    # valFolder = datasets.ImageFolder('./data/val', transform=transform)
+    # val_loader = torch.utils.data.DataLoader(valFolder, batch_size=1)
     testFolder = datasets.ImageFolder('./data/test', transform=transform)
     test_loader = torch.utils.data.DataLoader(testFolder, batch_size=1)
 
@@ -67,7 +69,8 @@ if __name__ == "__main__":
             imgs = imgs.cuda()
             labels = labels.cuda()
         output = net(imgs)
-        preds.append((output.data.cpu().numpy().tolist()[0], labels.data.cpu().numpy().tolist()[0]))
+        preds.append((output.data.cpu().numpy().tolist()[0], labels.data.cpu().numpy().tolist()[0]) if TRAINING_RESULTS
+                     else output.data.cpu().numpy().tolist()[0])
 
     with open('lightgbm/results.json', 'w+') as f:
         json.dump(preds, f)
