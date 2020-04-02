@@ -1,6 +1,7 @@
 #! python
 
-# Based on a processing script created by Aleksei Wan on 13.11.2019 (used with author's consent)
+# Based on a processing script created by Aleksei Wan on 13.11.2019
+# Adapted for use with this Project by Aleksei
 
 # Imports
 import os

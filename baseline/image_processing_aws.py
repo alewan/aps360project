@@ -1,6 +1,6 @@
 #! python
 
-# Created by Aleksei Wan on 28.10.2019, all rights reserved
+# Created by Aleksei Wan on 28.10.2019, used with author's consent, all rights reserved
 
 # Imports
 import os
