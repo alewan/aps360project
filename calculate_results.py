@@ -38,21 +38,35 @@ class EmotionNet(nn.Module):
         return x
 
 
+# class AlexASLNet(nn.Module):
+#     def __init__(self):
+#         super(AlexASLNet, self).__init__()
+#         self.name = "AlexEmotionNet-3layer-640-final"
+#         self.fc1 = nn.Linear(256 * 10 * 10, 192)
+#         self.fc2 = nn.Linear(192, 128)
+#         self.fc3 = nn.Linear(128, 8)
+#
+#     def forward(self, img):
+#         x = img.view(-1, 256 * 10 * 10)
+#         x = F.relu(self.fc1(x))
+#         x = F.relu(self.fc2(x))
+#         x = self.fc3(x)
+#         return x
+
 class AlexASLNet(nn.Module):
     def __init__(self):
         super(AlexASLNet, self).__init__()
-        self.name = "AlexEmotionNet-3layer-640-final"
-        self.fc1 = nn.Linear(256 * 10 * 10, 192)
+        self.name = "AlexEmotionNet-5class-3layer-640"
+        self.fc1 = nn.Linear(256*10*10, 192)
         self.fc2 = nn.Linear(192, 128)
-        self.fc3 = nn.Linear(128, 8)
+        self.fc3 = nn.Linear(128, 5)
 
     def forward(self, img):
-        x = img.view(-1, 256 * 10 * 10)
+        x = img.view(-1, 256*10*10)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
-
 
 def load_from_checkpoint(net, path):
     # load the model state from a final
@@ -84,7 +98,7 @@ if __name__ == "__main__":
                                     transforms.CenterCrop(80),
                                     transforms.ToTensor()])
     net = AlexASLNet()
-    load_from_checkpoint(net, 'cp')
+    load_from_checkpoint(net, 'cp1')
     test_set = datasets.DatasetFolder('./data/alex-full-features/test', loader=torch.load, extensions=('.tensor'))
     test_loader = torch.utils.data.DataLoader(test_set, batch_size=1)
     val_set = datasets.DatasetFolder('./data/alex-full-features/val', loader=torch.load, extensions=('.tensor'))
