@@ -13,6 +13,7 @@ torch.manual_seed(1)  # set the random seed
 TRAINING_RESULTS = True
 USE_TRANSFER_LEARNING = True
 
+
 class EmotionNet(nn.Module):
     def __init__(self):
         super(EmotionNet, self).__init__()
@@ -36,13 +37,29 @@ class EmotionNet(nn.Module):
         x = self.fc3(x)
         return x
 
+
+# class AlexASLNet(nn.Module):
+#     def __init__(self):
+#         super(AlexASLNet, self).__init__()
+#         self.name = "AlexEmotionNet-3layer-640-final"
+#         self.fc1 = nn.Linear(256 * 10 * 10, 192)
+#         self.fc2 = nn.Linear(192, 128)
+#         self.fc3 = nn.Linear(128, 8)
+#
+#     def forward(self, img):
+#         x = img.view(-1, 256 * 10 * 10)
+#         x = F.relu(self.fc1(x))
+#         x = F.relu(self.fc2(x))
+#         x = self.fc3(x)
+#         return x
+
 class AlexASLNet(nn.Module):
     def __init__(self):
         super(AlexASLNet, self).__init__()
-        self.name = "AlexEmotionNet-3layer-640-final"
+        self.name = "AlexEmotionNet-5class-3layer-640"
         self.fc1 = nn.Linear(256*10*10, 192)
         self.fc2 = nn.Linear(192, 128)
-        self.fc3 = nn.Linear(128, 8)
+        self.fc3 = nn.Linear(128, 5)
 
     def forward(self, img):
         x = img.view(-1, 256*10*10)
@@ -58,41 +75,51 @@ def load_from_checkpoint(net, path):
     net.eval()
     return
 
-
-if __name__ == "__main__":
-    transform = transforms.Compose([transforms.Resize((90, 160)),  # (1080,1920) (hight, width)
-                                    transforms.CenterCrop(80),
-                                    transforms.ToTensor()])
-    if USE_TRANSFER_LEARNING:
-        net = AlexASLNet()
-        load_from_checkpoint(net, 'cp_tlnn')
-        test_set = datasets.DatasetFolder('./data/alex-features/test', loader=torch.load, extensions=('.tensor'))
-        test_loader = torch.utils.data.DataLoader(test_set, batch_size=1)
-    else:
-        net = EmotionNet()
-        load_from_checkpoint(net, 'cp_ournn')
-        testFolder = datasets.ImageFolder('./data/test', transform=transform)
-        test_loader = torch.utils.data.DataLoader(testFolder, batch_size=1)
-
-    # valFolder = datasets.ImageFolder('./data/val', transform=transform)
-    # val_loader = torch.utils.data.DataLoader(valFolder, batch_size=1)
-
-
-    if torch.cuda.is_available():
-        net.cuda()
-
+def do_processing(dl, name):
     preds = []
     it = 0
-    print('Total Iterations:', len(test_loader))
-    for imgs, labels in test_loader:
+    for imgs, labels in dl:
         it += 1
         print('Iteration', it)
         if torch.cuda.is_available():
             imgs = imgs.cuda()
             labels = labels.cuda()
         output = net(imgs)
-        preds.append((output.data.cpu().numpy().tolist()[0], labels.data.cpu().numpy().tolist()[0]) if TRAINING_RESULTS
-                     else output.data.cpu().numpy().tolist()[0])
+        preds.append(
+            (output.data.cpu().numpy().tolist()[0], labels.data.cpu().numpy().tolist()[0]) if TRAINING_RESULTS
+            else output.data.cpu().numpy().tolist()[0])
+        with open('lightgbm/' + name + 'results.json', 'w+') as f:
+            json.dump(preds, f)
+    return
 
-    with open('lightgbm/results.json', 'w+') as f:
-        json.dump(preds, f)
+
+if __name__ == "__main__":
+    transform = transforms.Compose([transforms.Resize((90, 160)),  # (1080,1920) (hight, width)
+                                    transforms.CenterCrop(80),
+                                    transforms.ToTensor()])
+    net = AlexASLNet()
+    load_from_checkpoint(net, 'cp1')
+    test_set = datasets.DatasetFolder('./data/alex-full-features/test', loader=torch.load, extensions=('.tensor'))
+    test_loader = torch.utils.data.DataLoader(test_set, batch_size=1)
+    val_set = datasets.DatasetFolder('./data/alex-full-features/val', loader=torch.load, extensions=('.tensor'))
+    val_loader = torch.utils.data.DataLoader(val_set, batch_size=1)
+    train_set = datasets.DatasetFolder('./data/alex-full-features/train', loader=torch.load, extensions=('.tensor'))
+    train_loader = torch.utils.data.DataLoader(train_set, batch_size=1)
+
+    # net = EmotionNet()
+    # load_from_checkpoint(net, 'cp_ournn')
+    # trainFolder = datasets.ImageFolder('./lightgbm/train', transform=transform)
+    # train_loader = torch.utils.data.DataLoader(trainFolder, batch_size=1)
+    # valFolder = datasets.ImageFolder('./lightgbm/val', transform=transform)
+    # val_loader = torch.utils.data.DataLoader(valFolder, batch_size=1)
+    # testFolder = datasets.ImageFolder('./data/test', transform=transform)
+    # test_loader = torch.utils.data.DataLoader(testFolder, batch_size=1)
+
+    if torch.cuda.is_available():
+        net.cuda()
+
+    print('Total Iterations:', len(test_loader) + len(train_loader) + len(val_loader))
+
+    do_processing(train_loader, 'train')
+    do_processing(val_loader, 'val')
+    do_processing(test_loader, 'test')
