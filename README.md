@@ -11,7 +11,7 @@ The motivation behind this project is to create a way to recognize and categoriz
 
 ![Illustration](/imgs/Illustration.png)
 
-Figure 1: System Diagram with Major Components of the Project
+**Figure 1:** System Diagram with Major Components of the Project
 
 # Background & Related Work
 
@@ -37,7 +37,7 @@ The following are example pictures from after the data processing (Each of a dif
 
 ![Correct Sample Data](/imgs/correct_sample.png)
 
-Figure 2. From top left to bottom right: Angry, calm, disgust, fear, happy, neutral, sad, surprised.
+**Figure 2:** From top left to bottom right: Angry, calm, disgust, fear, happy, neutral, sad, surprised.
 
 # Architecture
 
@@ -47,7 +47,7 @@ The following shows the basic structure used for the CNNand LightGBM model. Firs
 
 ![Model LightGBM](/imgs/model_lightgbm.png)
 
-Figure 3. CNN with LightGBM model
+**Figure 3:** CNN with LightGBM model
 
 The following diagram shows the basic structure and specific parameters used for the best AlexNet model, the final model. As seen in the diagram, the AlexNet model has 3 fully connected layers at the end with ReLU activation function after the features extraction. The hyperparameters used were: the learning rate was 0.001, batch size of 32 with 85 epochs.
 
@@ -55,7 +55,7 @@ AlexNet is chosen because we have a classification problem, with a fixed input s
 
 ![Model](/imgs/model.png)
 
-Figure 4. Best AlexNet Model
+**Figure 4:** Best AlexNet Model
 
 # Baseline Model
 
@@ -63,11 +63,11 @@ The baseline model that we are using is Amazon Web Services (AWS) Rekognition [5
 
 ![AWS Rekognition Outline](/imgs/baseline1.png)
 
-Figure 5: AWS Rekognition Diagram
+**Figure 5:** AWS Rekognition Diagram
 
 ![AWS Rekognition Baseline](/imgs/baseline_aws.png)
 
-Figure 6. AWS Rekognition Web-based Interface & Emotional Categorizations Returned by AWS Rekognition
+**Figure 6:** AWS Rekognition Web-based Interface & Emotional Categorizations Returned by AWS Rekognition
 
 # Quantitative Results
 
@@ -158,7 +158,7 @@ The difficulty of this problem comes in two forms, the first being the quality o
 
 ![Misslabeled Actors](/imgs/misslabeled_actors_2.png)
 
-Figure 12: Showing the labels of the images not being representative of the images.
+**Figure 12:** Showing the labels of the images not being representative of the images.
 
 The second part of the difficulty comes from the continuity of human interactions. In Figure 12 above, the still images are not representative of a human readable emotion. Instead humans can understand emotion through context.. Context can be added in the form of audio cues or text cues; however, the purpose of this model was visual cue-based only. To add context, a series of images could be used with an RNN or LSTM model in order to better understand continuity but that adds a new level of complexity. How frequently do you have to sample in order for the images to maintain continuity, how many samples would be fed into the model, and how fast would the model train if all those samples were used? Due to the structure of RNNs the training time increase would not scale linearly with images. As such with the computational resources accessible, it would not be feasible to train a model using many past images as context.
 
